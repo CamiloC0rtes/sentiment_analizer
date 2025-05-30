@@ -95,8 +95,8 @@ From the root directory of the project:
 uvicorn api.main:app --reload --port 8080
 ```
 
-* API will be available at [http://localhost:8000](http://localhost:8080)
-* Swagger docs: [http://localhost:8000/docs](http://localhost:8080/docs)
+* API will be available at [http://localhost:8080](http://localhost:8080)
+* Swagger docs: [http://localhost:8080/docs](http://localhost:8080/docs)
 
 ---
 
