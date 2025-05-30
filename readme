@@ -1,131 +1,157 @@
-# Analizador de Sentimientos - API y Visualización
-
-Este proyecto es una API de análisis de sentimientos basada en FastAPI y un modelo de machine learning entrenado sobre el dataset de IMDb. Incluye una interfaz web (`Visual.html`) para interactuar fácilmente con el modelo.
+Aquí tienes una versión ajustada y optimizada del archivo `README.md` para publicarlo en GitHub. Se ha mejorado el formato, corregido algunos detalles de estructura, y añadido etiquetas útiles para la comunidad de desarrolladores:
 
 ---
 
-## Características
+```markdown
+# 📊 Sentiment Analyzer – API & Web Interface
 
-- **API REST** para análisis de sentimientos de textos individuales o por lotes.
-- **Modelo de ML** entrenado con scikit-learn y guardado con joblib.
-- **Preprocesamiento consistente** entre entrenamiento y predicción.
-- **Interfaz web moderna** para probar el modelo visualmente.
-- **Endpoints de salud y de información del modelo**.
+This project provides a **FastAPI-based sentiment analysis API** powered by a machine learning model trained on the IMDb dataset. It includes a lightweight **web interface (`Visual.html`)** for interacting with the model visually.
 
 ---
 
-## Estructura del Proyecto
+## 🚀 Features
+
+- ✅ **REST API** for analyzing single or batch text inputs.
+- 🤖 **ML model** trained using scikit-learn and saved with Joblib.
+- 🧹 **Consistent preprocessing** between training and inference.
+- 🌐 **Modern web interface** for quick testing.
+- 🔍 **Health check** and **model info** endpoints.
+
+---
+
+## 🧱 Project Structure
 
 ```
+
 analizadorsentimientos/
 │
 ├── api/
-│   ├── main.py           # Entrypoint de la API FastAPI
-│   └── predict.py        # Lógica de predicción y carga de modelo
+│   ├── main.py           # FastAPI app entrypoint
+│   └── predict.py        # Model loading and prediction logic
 │
 ├── model/
-│   └── train_model.py    # Script de entrenamiento y guardado del modelo
+│   ├── train\_model.py    # Model training script
+│   └── model.pkl         # Trained model (auto-generated)
 │
-├── model/
-│   └── model.pkl         # Modelo entrenado (se genera tras entrenar)
-│
-├── Visual.html           # Interfaz web para análisis de sentimientos
-├── requirements.txt      # Dependencias del proyecto
-└── README.md             # (Este archivo)
+├── Visual.html           # Web interface for sentiment analysis
+├── requirements.txt      # Project dependencies
+└── README.md             # You're here
+
+````
+
+---
+
+## ⚙️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/analizadorsentimientos.git
+   cd analizadorsentimientos
+````
+
+2. **Create and activate a virtual environment** (optional but recommended)
+
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Download IMDb dataset**
+   Download the `IMDB Dataset.csv` from [Kaggle](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews) and place it in the `model/` directory.
+
+---
+
+## 🧠 Train the Model
+
+1. Navigate to the `model/` folder:
+
+   ```bash
+   cd model
+   ```
+
+2. Run the training script:
+
+   ```bash
+   python train_model.py
+   ```
+
+   This will generate the file `model.pkl`.
+
+---
+
+## 🚀 Run the API
+
+From the root directory of the project:
+
+```bash
+uvicorn api.main:app --reload --port 8000
+```
+
+* API will be available at [http://localhost:8000](http://localhost:8000)
+* Swagger docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+## 🔌 Main Endpoints
+
+| Method | Endpoint         | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| POST   | `/predict`       | Predict sentiment for a single text  |
+| POST   | `/predict/batch` | Predict sentiment for multiple texts |
+| GET    | `/model/info`    | Returns model information            |
+| GET    | `/health`        | Health check of the API              |
+| GET    | `/docs`          | Swagger UI docs                      |
+
+---
+
+## 🌍 Web Interface
+
+1. Open `Visual.html` in a browser.
+2. Make sure the API is running.
+3. Modify the `API_BASE_URL` inside the HTML if you change the API port.
+
+---
+
+## 💡 Notes
+
+* Only binary sentiment classification: **positive** or **negative**.
+* Preprocessing logic must match between training and prediction.
+* If predictions seem inconsistent, retrain the model and verify `model.pkl`.
+* For production environments, **secure CORS settings**.
+
+---
+
+## 🙌 Credits
+
+* Built with **FastAPI**, **scikit-learn**, **NLTK**, and **IMDb dataset from Kaggle**.
+* Web interface built with vanilla **HTML, CSS, and JavaScript**.
+
+---
+
+## 🛠 Questions or Issues?
+
+Feel free to open an [issue](https://github.com/yourusername/analizadorsentimientos/issues) or contact the author.
+
+---
+
+> © 2025 – Juan Camilo Cortés Sánchez
+
 ```
 
 ---
 
-## Instalación
+### ✅ ¿Qué debes cambiar?
+- Reemplaza `https://github.com/yourusername/analizadorsentimientos.git` por la URL real de tu repositorio en GitHub.
+- Asegúrate de subir también `requirements.txt`, `Visual.html` y el resto del código.
 
-1. **Clona el repositorio**  
-   ```sh
-   git clone <url-del-repo>
-   cd analizadorsentimientos
-   ```
-
-2. **Crea un entorno virtual (opcional pero recomendado)**  
-   ```sh
-   python -m venv venv
-   venv\Scripts\activate
-   ```
-
-3. **Instala las dependencias**  
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-4. **Descarga el dataset de IMDb**  
-   Descarga `IMDB Dataset.csv` desde [Kaggle](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews) y colócalo en la carpeta `model/`.
-
----
-
-## Entrenamiento del Modelo
-
-1. Ve a la carpeta `model/`:
-   ```sh
-   cd model
-   ```
-
-2. Ejecuta el script de entrenamiento:
-   ```sh
-   python train_model.py
-   ```
-   Esto generará el archivo `model.pkl` en la carpeta `model/`.
-
----
-
-## Ejecución de la API
-
-1. Ve a la carpeta raíz del proyecto.
-2. Ejecuta el servidor:
-   ```sh
-   uvicorn api.main:app --reload --port 8000
-   ```
-   La API estará disponible en [http://localhost:8000](http://localhost:8000).
-
----
-
-## Endpoints Principales
-
-- `POST /predict`  
-  Analiza el sentimiento de un texto individual.
-- `POST /predict/batch`  
-  Analiza el sentimiento de varios textos.
-- `GET /model/info`  
-  Información sobre el modelo cargado.
-- `GET /health`  
-  Estado de salud de la API.
-- `GET /docs`  
-  Documentación interactiva (Swagger UI).
-
----
-
-## Interfaz Web
-
-1. Abre `Visual.html` en tu navegador.
-2. Asegúrate de que la API esté corriendo.
-3. Interactúa con el modelo desde la web.
-
-> **Nota:** Si cambias el puerto de la API, edita la variable `API_BASE_URL` en `Visual.html` para que coincida.
-
----
-
-## Notas y Consejos
-
-- El modelo solo distingue entre **positivo** y **negativo**.
-- El preprocesamiento debe ser idéntico en entrenamiento y predicción.
-- Si la predicción no es coherente, reentrena el modelo y asegúrate de que `model.pkl` es el correcto.
-- Para producción, restringe los orígenes permitidos en CORS.
-
----
-
-## Créditos
-
-- Basado en FastAPI, scikit-learn, NLTK y el dataset de IMDb de Kaggle.
-- Interfaz web desarrollada con HTML, CSS y JavaScript puro.
-
----
-
-¿Dudas o problemas?  
-Abre un issue o contacta al autor.
+¿Te gustaría que también te ayude a generar el `requirements.txt` si aún no lo tienes?
+```
