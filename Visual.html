@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis de Sentimientos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #4facfe;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .char-counter {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result.positive {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-left: 5px solid #4ade80;
+        }
+
+        .result.negative {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-left: 5px solid #f87171;
+        }
+
+        .sentiment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .sentiment-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .sentiment-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .scores {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .score-card {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .batch-input {
+            margin-bottom: 15px;
+        }
+
+        .batch-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .batch-item input {
+            flex: 1;
+        }
+
+        .remove-btn {
+            background: #f87171;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .add-btn {
+            background: #4ade80;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .batch-results {
+            display: grid;
+            gap: 15px;
+        }
+
+        .batch-result-item {
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .api-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .api-status.online {
+            background: #4ade80;
+        }
+
+        .api-status.offline {
+            background: #f87171;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #dc2626;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .scores {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="api-status" id="apiStatus">Verificando API...</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Análisis de Sentimientos</h1>
+            <p>Analiza el sentimiento de tus textos usando inteligencia artificial</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('single')">Texto Individual</button>
+                <button class="tab" onclick="switchTab('batch')">Análisis por Lotes</button>
+                <button class="tab" onclick="switchTab('info')">Información del Modelo</button>
+            </div>
+
+            <!-- Single Text Analysis -->
+            <div id="single" class="tab-content active">
+                <div class="form-group">
+                    <label for="textInput">Ingresa el texto a analizar:</label>
+                    <textarea 
+                        id="textInput" 
+                        placeholder="Escribe aquí el texto que quieres analizar..."
+                        rows="4"
+                        maxlength="5000"
+                        oninput="updateCharCounter()"
+                    ></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span> / 5000 caracteres
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="analyzeSentiment()" id="analyzeBtn">
+                    Analizar Sentimiento
+                </button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analizando sentimiento...</p>
+                </div>
+
+                <div id="result"></div>
+            </div>
+
+            <!-- Batch Analysis -->
+            <div id="batch" class="tab-content">
+                <div class="form-group">
+                    <label>Textos para análisis por lotes (máximo 100):</label>
+                    <div id="batchInputs">
+                        <div class="batch-item">
+                            <input type="text" placeholder="Texto 1..." maxlength="5000">
+                            <button class="remove-btn" onclick="removeBatchInput(this)">Eliminar</button>
+                        </div>
+                        <div class="batch-item">
+                            <input type="text" placeholder="Texto 2..." maxlength="5000">
+                            <button class="remove-btn" onclick="removeBatchInput(this)">Eliminar</button>
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addBatchInput()">+ Agregar Texto</button>
+                </div>
+
+                <button class="btn" onclick="analyzeBatchSentiment()" id="analyzeBatchBtn">
+                    Analizar Lote
+                </button>
+
+                <div class="loading" id="batchLoading">
+                    <div class="spinner"></div>
+                    <p>Analizando textos...</p>
+                </div>
+
+                <div id="batchResults"></div>
+            </div>
+
+            <!-- Model Info -->
+            <div id="info" class="tab-content">
+                <div id="modelInfo">
+                    <p>Cargando información del modelo...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        let apiOnline = false;
+
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                apiOnline = data.status === 'healthy';
+                updateApiStatus();
+            } catch (error) {
+                apiOnline = false;
+                updateApiStatus();
+            }
+        }
+
+        function updateApiStatus() {
+            const statusElement = document.getElementById('apiStatus');
+            if (apiOnline) {
+                statusElement.textContent = 'API Online';
+                statusElement.className = 'api-status online';
+            } else {
+                statusElement.textContent = 'API Offline';
+                statusElement.className = 'api-status offline';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to clicked tab and corresponding content
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            // Load model info when info tab is selected
+            if (tabName === 'info') {
+                loadModelInfo();
+            }
+        }
+
+        // Character counter
+        function updateCharCounter() {
+            const textInput = document.getElementById('textInput');
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = textInput.value.length;
+        }
+
+        // Single sentiment analysis
+        async function analyzeSentiment() {
+            const textInput = document.getElementById('textInput');
+            const text = textInput.value.trim();
+            
+            if (!text) {
+                alert('Por favor ingresa un texto para analizar');
+                return;
+            }
+
+            if (!apiOnline) {
+                showError('La API no está disponible. Verifica que el servidor esté ejecutándose.');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+
+            // Show loading
+            analyzeBtn.disabled = true;
+            loading.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al analizar el sentimiento: ' + error.message);
+            } finally {
+                analyzeBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        // Display single result
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            const isPositive = data.sentiment === 'positive';
+            
+            resultDiv.innerHTML = `
+                <div class="result ${data.sentiment}">
+                    <div class="sentiment-header">
+                        <span class="sentiment-icon">${isPositive ? '😊' : '😔'}</span>
+                        <div>
+                            <div class="sentiment-text">${isPositive ? 'Positivo' : 'Negativo'}</div>
+                            <div>Confianza: ${data.confidence.toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${data.confidence}%; background: ${isPositive ? '#4ade80' : '#f87171'}"></div>
+                    </div>
+                    
+                    <div class="scores">
+                        <div class="score-card">
+                            <div class="score-value" style="color: #4ade80">${(data.scores.positive * 100).toFixed(1)}%</div>
+                            <div>Positivo</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-value" style="color: #f87171">${(data.scores.negative * 100).toFixed(1)}%</div>
+                            <div>Negativo</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        <strong>Texto analizado:</strong> "${data.text}"
+                        <br><strong>Procesado:</strong> ${new Date(data.timestamp).toLocaleString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Batch input management
+        function addBatchInput() {
+            const batchInputs = document.getElementById('batchInputs');
+            const currentInputs = batchInputs.children.length;
+            
+            if (currentInputs >= 100) {
+                alert('Máximo 100 textos permitidos');
+                return;
+            }
+
+            const newInput = document.createElement('div');
+            newInput.className = 'batch-item';
+            newInput.innerHTML = `
+                <input type="text" placeholder="Texto ${currentInputs + 1}..." maxlength="5000">
+                <button class="remove-btn" onclick="removeBatchInput(this)">Eliminar</button>
+            `;
+            batchInputs.appendChild(newInput);
+        }
+
+        function removeBatchInput(button) {
+            const batchInputs = document.getElementById('batchInputs');
+            if (batchInputs.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('Debe mantener al menos un campo de texto');
+            }
+        }
+
+        // Batch sentiment analysis
+        async function analyzeBatchSentiment() {
+            const inputs = document.querySelectorAll('#batchInputs input');
+            const texts = Array.from(inputs)
+                .map(input => input.value.trim())
+                .filter(text => text.length > 0);
+
+            if (texts.length === 0) {
+                alert('Por favor ingresa al menos un texto para analizar');
+                return;
+            }
+
+            if (!apiOnline) {
+                showError('La API no está disponible. Verifica que el servidor esté ejecutándose.');
+                return;
+            }
+
+            const analyzeBatchBtn = document.getElementById('analyzeBatchBtn');
+            const batchLoading = document.getElementById('batchLoading');
+            const batchResults = document.getElementById('batchResults');
+
+            analyzeBatchBtn.disabled = true;
+            batchLoading.style.display = 'block';
+            batchResults.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/predict/batch`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ texts: texts })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayBatchResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error al analizar los textos: ' + error.message);
+            } finally {
+                analyzeBatchBtn.disabled = false;
+                batchLoading.style.display = 'none';
+            }
+        }
+
+        // Display batch results
+        function displayBatchResults(data) {
+            const batchResults = document.getElementById('batchResults');
+            
+            let resultsHTML = `
+                <h3>Resultados del Análisis por Lotes</h3>
+                <p>Total procesados: ${data.total_processed} | Procesado: ${new Date(data.timestamp).toLocaleString()}</p>
+                <div class="batch-results">
+            `;
+
+            data.results.forEach((result, index) => {
+                const isPositive = result.sentiment === 'positive';
+                resultsHTML += `
+                    <div class="batch-result-item result ${result.sentiment}">
+                        <div class="sentiment-header">
+                            <span class="sentiment-icon">${isPositive ? '😊' : '😔'}</span>
+                            <div>
+                                <div class="sentiment-text">${isPositive ? 'Positivo' : 'Negativo'}</div>
+                                <div>Confianza: ${result.confidence.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${result.confidence}%; background: ${isPositive ? '#4ade80' : '#f87171'}"></div>
+                        </div>
+                        
+                        <div style="margin-top: 10px; font-size: 0.9rem;">
+                            <strong>Texto:</strong> "${result.text}"
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsHTML += '</div>';
+            batchResults.innerHTML = resultsHTML;
+        }
+
+        // Load model information
+        async function loadModelInfo() {
+            const modelInfoDiv = document.getElementById('modelInfo');
+            
+            if (!apiOnline) {
+                modelInfoDiv.innerHTML = '<div class="error-message">La API no está disponible para cargar la información del modelo.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/model/info`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                modelInfoDiv.innerHTML = `
+                    <div class="result">
+                        <h3>🔬 Información del Modelo</h3>
+                        <div style="margin-top: 20px;">
+                            <p><strong>Tipo de Modelo:</strong> ${data.model_type}</p>
+                            <p><strong>Tamaño del Vocabulario:</strong> ${data.vocabulary_size.toLocaleString()} palabras</p>
+                            <p><strong>Clases:</strong> ${data.classes.join(', ')}</p>
+                            
+                            <h4 style="margin-top: 20px;">Pasos del Pipeline:</h4>
+                            <ul style="margin-left: 20px; margin-top: 10px;">
+                                ${data.pipeline_steps.map(step => `<li>${step}</li>`).join('')}
+                            </ul>
+                            
+                            <h4 style="margin-top: 20px;">Características de Ejemplo:</h4>
+                            <div style="margin-top: 10px;">
+                                ${data.sample_features.map(feature => `<span style="background: #e0f2fe; padding: 5px 10px; border-radius: 15px; margin: 2px; display: inline-block;">${feature}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading model info:', error);
+                modelInfoDiv.innerHTML = '<div class="error-message">Error al cargar la información del modelo: ' + error.message + '</div>';
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const activeTab = document.querySelector('.tab-content.active');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // Remove any existing error messages
+            activeTab.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            activeTab.appendChild(errorDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkApiStatus();
+            // Check API status every 30 seconds
+            setInterval(checkApiStatus, 30000);
+        });
+    </script>
+</body>
+</html>
