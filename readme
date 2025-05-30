@@ -1,13 +1,9 @@
-Aquí tienes una versión ajustada y optimizada del archivo `README.md` para publicarlo en GitHub. Se ha mejorado el formato, corregido algunos detalles de estructura, y añadido etiquetas útiles para la comunidad de desarrolladores:
 
----
-
-```markdown
 # 📊 Sentiment Analyzer – API & Web Interface
 
 This project provides a **FastAPI-based sentiment analysis API** powered by a machine learning model trained on the IMDb dataset. It includes a lightweight **web interface (`Visual.html`)** for interacting with the model visually.
 
----
+
 
 ## 🚀 Features
 
