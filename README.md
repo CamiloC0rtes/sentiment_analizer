@@ -92,11 +92,11 @@ analizadorsentimientos/
 From the root directory of the project:
 
 ```bash
-uvicorn api.main:app --reload --port 8000
+uvicorn api.main:app --reload --port 8080
 ```
 
-* API will be available at [http://localhost:8000](http://localhost:8000)
-* Swagger docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+* API will be available at [http://localhost:8000](http://localhost:8080)
+* Swagger docs: [http://localhost:8000/docs](http://localhost:8080/docs)
 
 ---
 
